@@ -8,9 +8,6 @@ import 'package:hetima/hetima.dart' as heti;
 class Token {}
 
 abstract class Command {
-  bool isMatched() {
-    return false;
-  }
   bool isSave() {
     return false;
   }
@@ -36,15 +33,11 @@ class MemoryStopCommand extends Command {
   }
 }
 
-class MatchCommandNotification extends Exception {
+class MatchCommandNotification extends Error {
   MatchCommandNotification(dynamic mes) {}
 }
 
 class MatchCommand extends Command {
-  bool isMatched() {
-    return true;
-  }
-
   async.Future<List<int>> check(RegexVM vm, heti.EasyParser parser) {
     async.Completer<List<int>> c = new async.Completer();
     c.completeError(new MatchCommandNotification(""));
@@ -162,19 +155,16 @@ class Task {
     }
 
     Command c = vm._commands[_commandPos];
-    if (c.isMatched() == true) {
-      completer.complete(ret);
-    } else {
-      c.check(vm, _parser).then((List<int> v) {
-        if (c.isSave() == true) {
-          completer.complete(ret);
-        } else {
-          completer.complete(null);
-        }
-      }).catchError((e) {
-        completer.completeError(e);
-      });
-    }
+
+    c.check(vm, _parser).then((List<int> v) {
+      if (c.isSave() == true) {
+        completer.complete(ret);
+      } else {
+        completer.complete(null);
+      }
+    }).catchError((e) {
+      completer.completeError(e);
+    });
     return completer.future;
   }
 
@@ -186,7 +176,7 @@ class Task {
         ret.add(v);
         return a();
       }).catchError((e) {
-        if(e is MatchCommandNotification) {
+        if (e is MatchCommandNotification) {
           completer.complete(ret);
         } else {
           completer.completeError(e);
