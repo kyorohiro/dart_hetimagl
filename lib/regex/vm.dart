@@ -17,13 +17,38 @@ abstract class Command {
   async.Future<List<int>> check(RegexVM vm, heti.EasyParser parser);
 }
 
+class MemoryStartCommand extends Command {
+  Task _childTask = null;
+
+  async.Future<List<int>> check(RegexVM vm, heti.EasyParser parser) {
+    async.Completer<List<int>> c = new async.Completer();
+    _childTask =
+        new Task.fromCommnadPos(vm.getCurrentTask()._commandPos, parser);
+    _childTask.match(vm);
+    return c.future;
+  }
+}
+
+class MemoryStopCommand extends Command {
+  async.Future<List<int>> check(RegexVM vm, heti.EasyParser parser) {
+    async.Completer<List<int>> c = new async.Completer();
+    return c.future;
+  }
+}
+
+class MatchCommandNotification extends Exception {
+  MatchCommandNotification(dynamic mes) {}
+}
+
 class MatchCommand extends Command {
   bool isMatched() {
     return true;
   }
 
   async.Future<List<int>> check(RegexVM vm, heti.EasyParser parser) {
-    return null;
+    async.Completer<List<int>> c = new async.Completer();
+    c.completeError(new MatchCommandNotification(""));
+    return c.future;
   }
 }
 
@@ -122,33 +147,51 @@ class Task {
   heti.EasyParser _parser = null;
   int get commandPos => _commandPos;
 
+  Task _child = null; // group
   Task.fromCommnadPos(int commandPos, heti.EasyParser parser) {
     _commandPos = commandPos;
     _parser = parser.toClone();
   }
 
+  async.Future<List<int>> executeNextCommand(RegexVM vm) {
+    async.Completer<List<int>> completer = new async.Completer();
+    List<int> ret = [];
+    if (_commandPos >= vm._commands.length) {
+      completer.completeError(new Exception(""));
+      return completer.future;
+    }
+
+    Command c = vm._commands[_commandPos];
+    if (c.isMatched() == true) {
+      completer.complete(ret);
+    } else {
+      c.check(vm, _parser).then((List<int> v) {
+        if (c.isSave() == true) {
+          completer.complete(ret);
+        } else {
+          completer.complete(null);
+        }
+      }).catchError((e) {
+        completer.completeError(e);
+      });
+    }
+    return completer.future;
+  }
+
   async.Future<List<List<int>>> match(RegexVM vm) {
-    async.Completer completer = new async.Completer();
+    async.Completer<List<List<int>>> completer = new async.Completer();
     List<List<int>> ret = [];
     a() {
-      if (_commandPos > vm._commands.length) {
-        completer.completeError(new Exception(""));
-        return;
-      }
-
-      Command c = vm._commands[_commandPos];
-      if (c.isMatched() == true) {
-        completer.complete(ret);
-      } else {
-        c.check(vm, _parser).then((List<int> v) {
-          if (c.isSave() == true) {
-            ret.add(v);
-          }
-          a();
-        }).catchError((e) {
+      return executeNextCommand(vm).then((List<int> v) {
+        ret.add(v);
+        return a();
+      }).catchError((e) {
+        if(e is MatchCommandNotification) {
+          completer.complete(ret);
+        } else {
           completer.completeError(e);
-        });
-      }
+        }
+      });
     }
     a();
     return completer.future;
