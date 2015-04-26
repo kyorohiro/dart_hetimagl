@@ -3,7 +3,7 @@
 
 library dart_hetimagl_test;
 
-import 'package:hetimagl/hetimagl.dart';
+//import 'package:hetimagl/hetimagl.dart';
 import 'package:unittest/unittest.dart';
 
 void main() => defineTests();

@@ -54,6 +54,7 @@ void main() {
   int locationVertexPosition = GL.getAttribLocation(shaderProgram, "vertexPosition");
   GL.vertexAttribPointer(locationVertexPosition, 3, webgl.RenderingContext.FLOAT, false, 0, 0);
 
+  
   GL.enableVertexAttribArray(locationVertexPosition);
   GL.drawElements(webgl.RenderingContext.TRIANGLES, 6, webgl.RenderingContext.UNSIGNED_SHORT, 0);
 }
