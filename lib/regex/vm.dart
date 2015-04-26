@@ -8,20 +8,17 @@ import 'package:hetima/hetima.dart' as heti;
 class Token {}
 
 abstract class Command {
-  bool isSave() {
-    return false;
-  }
   async.Future<List<int>> check(RegexVM vm, heti.EasyParser parser);
 }
 
 class MemoryStartCommand extends Command {
-  Task _childTask = null;
-
   async.Future<List<int>> check(RegexVM vm, heti.EasyParser parser) {
     async.Completer<List<int>> c = new async.Completer();
-    _childTask =
-        new Task.fromCommnadPos(vm.getCurrentTask()._commandPos, parser);
-    _childTask.match(vm);
+    Task currentTask = vm.getCurrentTask();
+    int index = currentTask._nextMemoryId;
+    currentTask._nextMemoryId++;
+    currentTask._memory.add([]);
+    currentTask._memoryWritable.add(index);
     return c.future;
   }
 }
@@ -29,6 +26,9 @@ class MemoryStartCommand extends Command {
 class MemoryStopCommand extends Command {
   async.Future<List<int>> check(RegexVM vm, heti.EasyParser parser) {
     async.Completer<List<int>> c = new async.Completer();
+    Task currentTask = vm.getCurrentTask();
+    currentTask._memoryWritable.removeLast();
+    c.complete([]);
     return c.future;
   }
 }
@@ -140,7 +140,10 @@ class Task {
   heti.EasyParser _parser = null;
   int get commandPos => _commandPos;
 
-  Task _child = null; // group
+  List<List<int>> _memory = [];
+  List<int> _memoryWritable = [];
+  int _nextMemoryId = 0;
+
   Task.fromCommnadPos(int commandPos, heti.EasyParser parser) {
     _commandPos = commandPos;
     _parser = parser.toClone();
@@ -153,15 +156,9 @@ class Task {
       completer.completeError(new Exception(""));
       return completer.future;
     }
-
     Command c = vm._commands[_commandPos];
-
     c.check(vm, _parser).then((List<int> v) {
-      if (c.isSave() == true) {
-        completer.complete(ret);
-      } else {
-        completer.complete(null);
-      }
+        completer.complete([]);
     }).catchError((e) {
       completer.completeError(e);
     });
@@ -171,10 +168,10 @@ class Task {
   async.Future<List<List<int>>> match(RegexVM vm) {
     async.Completer<List<List<int>>> completer = new async.Completer();
     List<List<int>> ret = [];
-    a() {
+    loop() {
       return executeNextCommand(vm).then((List<int> v) {
         ret.add(v);
-        return a();
+        return loop();
       }).catchError((e) {
         if (e is MatchCommandNotification) {
           completer.complete(ret);
@@ -183,7 +180,7 @@ class Task {
         }
       });
     }
-    a();
+    loop();
     return completer.future;
   }
 }
@@ -229,7 +226,7 @@ class RegexVM {
         new heti.EasyParser(new heti.ArrayBuilder.fromList(text, true));
     _tasks.add(new Task.fromCommnadPos(0, parser));
 
-    a() {
+    loop() {
       Task task = getCurrentTask();
       if (task == null) {
         completer.completeError(new Exception());
@@ -239,11 +236,10 @@ class RegexVM {
         completer.complete(v);
       }).catchError((e) {
         popCurrentTask();
-        a();
+        loop();
       });
     }
-    ;
-    a();
+    loop();
     return completer.future;
   }
 }
