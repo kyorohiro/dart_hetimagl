@@ -11,6 +11,7 @@ void main() => script00();
 
 void script00() {
   group('regex00', () {
+    
     test('char true', () {
       regex.RegexVM vm = new regex.RegexVM.createFromCommand([
         new regex.CharCommand.createFromList(conv.UTF8.encode("aa")),
@@ -164,6 +165,22 @@ void script00() {
         expect(true, false);
       }).catchError((e) {
         expect(true, true);        
+      });
+    });
+    test('char memory true', () {
+      regex.RegexVM vm = new regex.RegexVM.createFromCommand([
+        new regex.MemoryStartCommand(),
+        new regex.CharCommand.createFromList(conv.UTF8.encode("aa")),
+        new regex.CharCommand.createFromList(conv.UTF8.encode("bb")),
+        new regex.MemoryStopCommand(),
+        new regex.MatchCommand(),
+        ]);
+
+      return vm.match(conv.UTF8.encode("aabbc")).then((List<List<int>> v){
+        expect(true, true);
+        expect(conv.UTF8.decode(v[0]), "aabb");
+      }).catchError((e) {
+        expect(true, false);        
       });
     });
   });

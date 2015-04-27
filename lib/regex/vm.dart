@@ -19,6 +19,8 @@ class MemoryStartCommand extends Command {
     currentTask._nextMemoryId++;
     currentTask._memory.add([]);
     currentTask._memoryWritable.add(index);
+    currentTask._commandPos++;
+    c.complete([]);
     return c.future;
   }
 }
@@ -28,6 +30,7 @@ class MemoryStopCommand extends Command {
     async.Completer<List<int>> c = new async.Completer();
     Task currentTask = vm.getCurrentTask();
     currentTask._memoryWritable.removeLast();
+    currentTask._commandPos++;
     c.complete([]);
     return c.future;
   }
@@ -149,6 +152,12 @@ class Task {
     _parser = parser.toClone();
   }
 
+  void tryAddMemory(List<int> v) {
+    if(_memoryWritable.length > 0) {
+      _memory[_memoryWritable.last].addAll(v);
+    }
+  }
+  
   async.Future<List<int>> executeNextCommand(RegexVM vm) {
     async.Completer<List<int>> completer = new async.Completer();
     List<int> ret = [];
@@ -158,7 +167,7 @@ class Task {
     }
     Command c = vm._commands[_commandPos];
     c.check(vm, _parser).then((List<int> v) {
-        completer.complete([]);
+        completer.complete(v);
     }).catchError((e) {
       completer.completeError(e);
     });
@@ -167,14 +176,13 @@ class Task {
 
   async.Future<List<List<int>>> match(RegexVM vm) {
     async.Completer<List<List<int>>> completer = new async.Completer();
-    List<List<int>> ret = [];
     loop() {
       return executeNextCommand(vm).then((List<int> v) {
-        ret.add(v);
+        tryAddMemory(v);
         return loop();
       }).catchError((e) {
         if (e is MatchCommandNotification) {
-          completer.complete(ret);
+          completer.complete(_memory);
         } else {
           completer.completeError(e);
         }
