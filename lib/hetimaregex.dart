@@ -6,4 +6,6 @@ import 'package:hetima/hetima.dart' as heti;
 import 'dart:convert' as conv;
 import 'dart:async' as async;
 
-part 'regex/vm.dart';
+part 'regex/regexvm.dart';
+part 'regex/regextask.dart';
+part 'regex/regexcommand.dart';
