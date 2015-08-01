@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+<title>WebGL 001</title>
+<style>
+body {
+  background-color: #555555;
+  margin: 0px;
+  overflow: hidden;
+}
+a {
+  color: #0078ff;
+}
+</style>
+</head>
+<body>
+  <h1>WebGL 001</h1>
+  <h2>背景を任意の色でクリアする。</h2>
+  <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script src="packages/chrome/bootstrap.js" defer></script>
+  <script src="clear_screen.dart" type="application/dart"></script>
+  <!--div>
+  <a href="clear_screen.dart">source</a>
+  </div-->
+<div id="editor-div" style="height: 500px; width: 500px">ここがエディタになります</div>
+
+<script>
+// http://stackoverflow.com/questions/247483/http-get-request-in-javascript
+var HttpClient = function() {
+    this.get = function(aUrl, aCallback) {
+        var anHttpRequest = new XMLHttpRequest();
+        anHttpRequest.onreadystatechange = function() { 
+            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                aCallback(anHttpRequest.responseText);
+        }
+
+        anHttpRequest.open( "GET", aUrl, true );            
+        anHttpRequest.send( null );
+    }
+}
+
+function view() {
+aClient = new HttpClient();
+aClient.get("./clear_screen.dart", function(response) {
+    // do something with response
+       var editor = ace.edit("editor-div");
+   editor.setValue(response, 1);
+});
+}
+
+</script>
+<input type="button" onClick="view()">
+  <h3>glclear</h3>
+  <div>
+  2次元のピクセル列として、カラーバッファ、デプスバッファ、ステンシルバッファを持っている。
+  これらのバッファをロジカルに合成して、画面に絵を表示している。
+  今回のサンプルサンプルでは、カラーバッファをクリアすることで画面をクリアした。
+  この時点では、カラーバッファは、画面に表示されているピクセルに対応している。  
+  </div>
+</body>\
+</html>
