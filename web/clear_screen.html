@@ -14,18 +14,6 @@ a {
   color: #0078ff;
 }
 </style>
-</head>
-<body>
-  <h1>WebGL 001</h1>
-  <h2>背景を任意の色でクリアする。</h2>
-  <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
-  <script src="packages/chrome/bootstrap.js" defer></script>
-  <script src="clear_screen.dart" type="application/dart"></script>
-  <!--div>
-  <a href="clear_screen.dart">source</a>
-  </div-->
-<div id="editor-div" style="height: 500px; width: 500px">ここがエディタになります</div>
-
 <script>
 // http://stackoverflow.com/questions/247483/http-get-request-in-javascript
 var HttpClient = function() {
@@ -45,13 +33,30 @@ function view() {
 aClient = new HttpClient();
 aClient.get("./clear_screen.dart", function(response) {
     // do something with response
-       var editor = ace.edit("editor-div");
+   editor = ace.edit("editor-div");
    editor.setValue(response, 1);
+   document.getElementById("editor-div").style.display="block";
+   document.getElementById("viewButton").style.display="none";
 });
 }
 
 </script>
-<input type="button" onClick="view()">
+</head>
+<body>
+  <h1>WebGL 001</h1>
+  <h2>背景を任意の色でクリアする。</h2>
+  <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script src="packages/chrome/bootstrap.js" defer></script>
+  <script src="clear_screen.dart" type="application/dart"></script>
+  <!--div>
+  <a href="clear_screen.dart">source</a>
+  </div-->
+
+
+
+<input id="viewButton" type="button" onClick="view()" value="view source">
+<div id="editor-div" style="height:300px; width: 500px; display:none">ここがエディタになります</div>
+
   <h3>glclear</h3>
   <div>
   2次元のピクセル列として、カラーバッファ、デプスバッファ、ステンシルバッファを持っている。
@@ -59,5 +64,5 @@ aClient.get("./clear_screen.dart", function(response) {
   今回のサンプルサンプルでは、カラーバッファをクリアすることで画面をクリアした。
   この時点では、カラーバッファは、画面に表示されているピクセルに対応している。  
   </div>
-</body>\
+</body>
 </html>
