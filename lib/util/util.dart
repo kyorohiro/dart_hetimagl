@@ -18,7 +18,7 @@ void linkShader(webgl.RenderingContext context, webgl.Program shaderProgram, web
   context.attachShader(shaderProgram, fragmentShader);
   context.linkProgram(shaderProgram);
   if (false == context.getProgramParameter(shaderProgram, webgl.RenderingContext.LINK_STATUS)) {
-    String message = "alert: Failed to linked shader";
+    String message = "alert: Failed to linked shader: ${context.getProgramInfoLog(shaderProgram)}";
     throw new Exception("${message}\n");
   }
 }
