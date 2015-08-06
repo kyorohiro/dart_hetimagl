@@ -1,7 +1,6 @@
 import 'dart:html' as html;
 import 'dart:web_gl' as webgl;
 import 'dart:typed_data' as data;
-import 'package:hetimagl/hetimagl.dart' as hetimagl;
 
 void main() {
   var canvas = new html.CanvasElement(width: 500, height: 500);
@@ -63,9 +62,8 @@ webgl.Shader loadShader(webgl.RenderingContext context, int type, var src) {
   context.compileShader(shader);
   if (false == context.getShaderParameter(shader, webgl.RenderingContext.COMPILE_STATUS)) {
     String message = "Error compiling shader ${context.getShaderInfoLog(shader)}";
-    throw new Exception("${message}\n");
     context.deleteShader(shader);
-    return null;
+    throw new Exception("${message}\n");
   }
   return shader;
 }
