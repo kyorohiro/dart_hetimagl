@@ -33,7 +33,11 @@ void main() {
           "void main() {\n" +
           " float r = (cos(t)+1.0)/2.0;\n"
           " float g = (sin(t)+1.0)/2.0;\n"
-          " gl_FragColor = vec4(r, x/500.0,y/500.0,t);\n" +
+//          " float b = cos((gl_FragCoord.x-x)*0.01);\n"
+//          " float a = cos((gl_FragCoord.y-y)*0.01);\n"
+          " float b = 100.0-sqrt((gl_FragCoord.x-x)*(gl_FragCoord.x-x)+(gl_FragCoord.y-y)*(gl_FragCoord.y-y));\n"
+          " float a = cos((gl_FragCoord.y-y)*0.1);\n"
+          " gl_FragColor = vec4(r, b/100.0, b/100.0, g);\n" +
           "}\n");
 
   webgl.Program shaderProgram = GL.createProgram();
@@ -92,7 +96,7 @@ void main() {
     webgl.UniformLocation mouseX = GL.getUniformLocation(shaderProgram, "x");
     webgl.UniformLocation mouseY = GL.getUniformLocation(shaderProgram, "y");
     GL.uniform1f(mouseX, x);
-    GL.uniform1f(mouseY, y);
+    GL.uniform1f(mouseY, 500-y);
 
     GL.drawElements(webgl.RenderingContext.TRIANGLES, 6,
         webgl.RenderingContext.UNSIGNED_SHORT, 0);
