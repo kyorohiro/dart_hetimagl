@@ -6,6 +6,13 @@ import 'dart:async';
 void main() {
   var canvas = new html.CanvasElement(width: 500, height: 500);
   html.document.body.append(canvas);
+  double x = 0.0;
+  double y = 0.0;
+  canvas.onMouseMove.listen((html.MouseEvent e) {
+    html.Rectangle t =  canvas.getBoundingClientRect();
+    x = e.clientX - t.left;
+    y = e.clientY - t.top;
+  });
 
   webgl.RenderingContext GL = canvas.getContext3d();
 
@@ -21,10 +28,12 @@ void main() {
       webgl.RenderingContext.FRAGMENT_SHADER, 
       "precision mediump float;\n" +
       "uniform float t;\n" +
+      "uniform float x;\n" +
+      "uniform float y;\n" +
           "void main() {\n" +
           " float r = (cos(t)+1.0)/2.0;\n"
           " float g = (sin(t)+1.0)/2.0;\n"
-          " gl_FragColor = vec4(r, g,0.0,t);\n" +
+          " gl_FragColor = vec4(r, x/500.0,y/500.0,t);\n" +
           "}\n");
 
   webgl.Program shaderProgram = GL.createProgram();
@@ -76,15 +85,21 @@ void main() {
     int lastTime = new DateTime.now().millisecondsSinceEpoch;
     double t = (lastTime - startTime) *0.001;
     //print("##${t}");
+
     webgl.UniformLocation timeLocation = GL.getUniformLocation(shaderProgram, "t");
     GL.uniform1f(timeLocation, t);
+    
+    webgl.UniformLocation mouseX = GL.getUniformLocation(shaderProgram, "x");
+    webgl.UniformLocation mouseY = GL.getUniformLocation(shaderProgram, "y");
+    GL.uniform1f(mouseX, x);
+    GL.uniform1f(mouseY, y);
 
     GL.drawElements(webgl.RenderingContext.TRIANGLES, 6,
         webgl.RenderingContext.UNSIGNED_SHORT, 0);
 
     new Future.delayed(new Duration(milliseconds:10)).then((render));
     if(count %100 == 0) {
-      print("fps=${count/t.toInt()}");
+      print("fps=${count/t.toInt()};x=${x};y=${y}");
     }
   }
 
