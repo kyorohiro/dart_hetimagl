@@ -30,15 +30,12 @@ void main() {
       "uniform float t;\n" +
       "uniform float x;\n" +
       "uniform float y;\n" +
-          "void main() {\n" +
-          " float r = (cos(t)+1.0)/2.0;\n"
-          " float g = (sin(t)+1.0)/2.0;\n"
-//          " float b = cos((gl_FragCoord.x-x)*0.01);\n"
-//          " float a = cos((gl_FragCoord.y-y)*0.01);\n"
-          " float b = 100.0-sqrt((gl_FragCoord.x-x)*(gl_FragCoord.x-x)+(gl_FragCoord.y-y)*(gl_FragCoord.y-y));\n"
-          " float a = cos((gl_FragCoord.y-y)*0.1);\n"
-          " gl_FragColor = vec4(r, b/100.0, b/100.0, g);\n" +
-          "}\n");
+      "void main() {\n" +
+      " float r = (cos(t)+1.0)/2.0;\n"
+      " float a = (sin(t)+1.0)/2.0;\n"
+      " float gb = 100.0-sqrt((gl_FragCoord.x-x)*(gl_FragCoord.x-x)+(gl_FragCoord.y-y)*(gl_FragCoord.y-y));\n"
+      " gl_FragColor = vec4(r, gb/100.0, gb/100.0, a);\n" +
+     "}\n");
 
   webgl.Program shaderProgram = GL.createProgram();
   GL.attachShader(shaderProgram, fragmentShader);
